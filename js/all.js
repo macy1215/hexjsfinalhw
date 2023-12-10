@@ -113,7 +113,7 @@ function getCartList(){
         cartData=response.data.carts;
         //可以新增一個如果購物車無資料可顯示甚麼<可以依照資料長度=0時
         let str='';
-        console.log(response.data.finalTotal);
+        //console.log(response.data.finalTotal);
         //總計核算的寫法，如果後端有寫就用後端的
         document.querySelector('.js-total').textContent=response.data.finalTotal
         cartData.forEach(function(item){   
@@ -175,4 +175,50 @@ discardAllBtn.addEventListener('click',function(e){
             console.log(error);
             alert('購物車已經清空，請勿重複點擊')
         })
+})
+
+//訂單送出 不用form表單送出
+const orderInfoBtn = document.querySelector('.orderInfo-btn');
+orderInfoBtn.addEventListener('click',function(e){
+    e.preventDefault();
+    if(cartData.length == 0){
+        alert('請加入購物車')
+        return;
+    }else{
+        //alert('購物車有資料');
+    }
+    //console.log('你被點擊了');
+    const custmerName = document.querySelector('#customerName').value;
+    const custmerPhone = document.querySelector('#customerPhone').value;
+    const customerEmail = document.querySelector('#customerEmail').value;
+    const customerAddress = document.querySelector('#customerAddress').value;
+    const tradeWay = document.querySelector('#tradeWay').value;
+    //console.log(custmerName,custmerPhone,customerEmail,customerAddress,tradeWay)
+    //input空值的話無法送出
+    if(custmerName==''|| custmerPhone==''|| customerEmail==''|| customerAddress==''|| tradeWay==''){
+        e.preventDefault();
+        alert('請輸入訂單資訊')
+        return;
+    }
+    axios.post(`${url}/api/livejs/v1/customer/${api_path}/orders`,{
+        "data": {
+                    "user": {
+                        "name": custmerName,
+                        "tel": custmerPhone,
+                        "email": customerEmail,
+                        "address": customerAddress,
+                        "payment": tradeWay
+                        }
+                    }
+    }).then(function(response){
+        alert('訂單建立成功');
+        //送出後清空訂單內容
+            document.querySelector('#customerName').value='';
+            document.querySelector('#customerPhone').value='';
+            document.querySelector('#customerEmail').value='';
+            document.querySelector('#customerAddress').value='';
+            document.querySelector('#tradeWay').value='ATM';
+        getCartList();
+    })
+
 })
