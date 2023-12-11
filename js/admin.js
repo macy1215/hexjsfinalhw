@@ -167,6 +167,7 @@ function changeOrderStatus(status,id){
             }) 
 }
 
+//刪除訂單
 function deleteOderItem(id){
     console.log(id);
     //刪除訂單
@@ -183,3 +184,21 @@ function deleteOderItem(id){
                 console.log(error);
             }) 
 }
+
+//刪除全部訂單
+const discardAllBtn=document.querySelector('.discardAllBtn');
+discardAllBtn.addEventListener('click',function(e){
+    e.preventDefault();
+    axios.delete(`${url}/api/livejs/v1/admin/${api_path}/orders`,{
+        headers:{
+            'Authorization':token,
+                }
+            })
+            .then(function(response){
+                alert('刪除全部訂單成功');
+                getOrderList();
+            })
+            .catch(function (error) {
+                console.log(error);
+            }) 
+})
