@@ -30,8 +30,8 @@ function combineProductHTMLItem(item){
                 <img src="${item.images}">
                 <a href="#" id="addCardBtn" class='js-addCart' data-id='${item.id}'>加入購物車</a>
                 <h3>${item.title}</h3>
-                <del class="originPrice">NT$${item.origin_price}</del>
-                <p class="nowPrice">NT$${item.price}</p>
+                <del class="originPrice">NT$${toThousands(item.origin_price)}</del>
+                <p class="nowPrice">NT$${toThousands(item.price)}</p>
             </li>`;
 };
 
@@ -114,8 +114,10 @@ function getCartList(){
         //可以新增一個如果購物車無資料可顯示甚麼<可以依照資料長度=0時
         let str='';
         //console.log(response.data.finalTotal);
+        
         //總計核算的寫法，如果後端有寫就用後端的
-        document.querySelector('.js-total').textContent=response.data.finalTotal
+        document.querySelector('.js-total').textContent=toThousands(response.data.finalTotal);
+
         cartData.forEach(function(item){   
             str+=`<tr>
                     <td>
@@ -124,9 +126,9 @@ function getCartList(){
                             <p>${item.product.title}</p>
                         </div>
                     </td>
-                    <td>NT$${item.product.price}</td>
+                    <td>NT$${toThousands(item.product.price)}</td>
                     <td>${item.quantity}</td>
-                    <td>NT$${item.product.price * item.quantity}</td>
+                    <td>NT$${toThousands(item.product.price * item.quantity)}</td>
                     <td class="discardBtn">
                         <a href="#" class="material-icons" data-id='${item.id}'>
                             clear
@@ -222,3 +224,10 @@ orderInfoBtn.addEventListener('click',function(e){
     })
 
 })
+
+//util js
+function toThousands(x){ 
+	let parts = x.toString().split("."); //將小數點先移除
+	parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");
+	return parts.join(".");
+}

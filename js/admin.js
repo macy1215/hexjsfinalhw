@@ -1,7 +1,7 @@
 //要在 CLIENT端可以收到
 //console.log('hi')
 let orderData =[];
-const orderList = document.querySelector('.js-orderList')
+const orderList = document.querySelector ('.js-orderList');
 
 //初始化
  function init(){
@@ -11,7 +11,7 @@ const orderList = document.querySelector('.js-orderList')
 
 
  function  renderC3(){
-    console.log(orderData);//確認值有撈回來
+    //console.log(orderData);//確認值有撈回來
     //物件資料蒐集
     let total ={};
     orderData.forEach(function(item){
@@ -38,20 +38,96 @@ const orderList = document.querySelector('.js-orderList')
         //console.log(newData);
     })
     // C3.js
-    let chart = c3.generate({
+    // let chart = c3.generate({
+    //     bindto: '#chart', // HTML 元素綁定
+    //     data: {
+    //         type: "pie",
+    //         columns: rankSortAry,
+    //         // colors:{
+    //         //     "Louvre 雙人床架":"#DACBFF",
+    //         //     "Antony 雙人床架":"#9D7FEA",
+    //         //     "Anty 雙人床架": "#5434A7",
+    //         //     "其他": "#301E5F",
+    //         // }
+            
+    //     },
+    //     colors:{
+    //       partten:["#301E5F","#5434A7","#9D7FEA","#DACBFF"]       
+    //     }
+    // });
+ };
+
+ //進階用法 sort
+ function renderC3_lv2(){
+    //資料蒐集
+    let obj={};
+    orderData.forEach(function(item){
+        item.products.forEach(function(productItem){
+            if(obj[productItem.title] === undefined){
+                obj[productItem.title] = productItem.quantity * productItem.price;
+                //console.log(obj)
+            }else{
+                obj[productItem.title] += productItem.quantity * productItem.price;
+            }
+        })
+    });
+    console.log(obj);
+ 
+    //拉出資料關聯
+    let originAry=Object.keys(obj);
+   // console.log(originAry);
+
+   //產出C3格式的資料
+   let rankSortAry=[];
+
+   originAry.forEach(function(item){
+     let ary=[];
+     ary.push(item);
+     ary.push(obj[item])//推入該屬性的值
+     //console.log(ary);
+    rankSortAry.push(ary);//換成c3要得格式，並且拿來做比較。並將最後的項目轉換成其他
+   })
+   //比大小，降冪排列(目的:取營收前三名的品項當主要色塊，把其餘的品項加總起來當成一個色塊)
+
+   rankSortAry.sort(function(a,b){
+    return b[1]-a[1];
+   })
+   //console.log(rankSortAry);
+
+   //比數超過4以上，就統整為其他 0.1.2.3....第四筆所以是大於3
+   if(rankSortAry.length >3){
+        let otherTotal = 0; //其他的總數
+        rankSortAry.forEach(function(item,index){
+            if(index > 2){
+                otherTotal+=rankSortAry[index][1];
+            }
+        })
+        rankSortAry.splice(3,rankSortAry.length-1);//第三筆之後的資料都移除，不需要再有第4明後的資料 splice[索引（起始為 0）,刪除的,新增的];
+        rankSortAry.push(['其他',otherTotal]);
+   }
+
+   //console.log(rankSortAry);
+   c3.generate({
         bindto: '#chart', // HTML 元素綁定
         data: {
             type: "pie",
-            columns: newData,
+            columns: rankSortAry,
             // colors:{
             //     "Louvre 雙人床架":"#DACBFF",
             //     "Antony 雙人床架":"#9D7FEA",
             //     "Anty 雙人床架": "#5434A7",
             //     "其他": "#301E5F",
             // }
+            
         },
+        color:{
+            pattern:["#301E5F","#5434A7","#9D7FEA","#DACBFF"]       
+        }
     });
- }
+
+ };
+
+
 function getOrderList(){
     axios.get(`${url}/api/livejs/v1/admin/${api_path}/orders`,{
         headers:{
@@ -105,6 +181,7 @@ function getOrderList(){
             })
         orderList.innerHTML=str;
         renderC3();//資料撈回來後再跟訂單列表一起渲染出圖表(連動的方法)
+        renderC3_lv2();//
     })
     .catch(function (error) {
         console.log(error);
@@ -202,3 +279,10 @@ discardAllBtn.addEventListener('click',function(e){
                 console.log(error);
             }) 
 })
+
+//util js
+function toThousands(x){ 
+	let parts = x.toString().split("."); //將小數點先移除
+	parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");
+	return parts.join(".");
+}
