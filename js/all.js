@@ -199,9 +199,14 @@ orderInfoBtn.addEventListener('click',function(e){
     //input空值的話無法送出
     if(custmerName==''|| custmerPhone==''|| customerEmail==''|| customerAddress==''|| tradeWay==''){
         e.preventDefault();
-        alert('請輸入訂單資訊')
-        return;
+        alert('請勿輸入空的資訊')
+        returWn;
     }
+    if(validateEmail(customerEmail)==false){
+        alert('請填寫正確的email格式');
+        return;
+    }   
+    
     axios.post(`${url}/api/livejs/v1/customer/${api_path}/orders`,{
         "data": {
                     "user": {
@@ -225,9 +230,56 @@ orderInfoBtn.addEventListener('click',function(e){
 
 })
 
+//想要在input欄位旁跳出文字提醒寫法
+const customerEmail = document.querySelector('#customerEmail');
+customerEmail.addEventListener("blur",function(e){
+    if(validateEmail(customerEmail.value)==false){
+        //alert('請填寫正確的email格式');
+        document.querySelector(`[data-message="Email"]`).textContent = "請填寫正確email格式";
+        return;
+    }   
+})
+
+const custmerPhone = document.querySelector('#customerPhone');
+custmerPhone.addEventListener('blur',function(e){
+    if(validatePhone(custmerPhone.value)==false){
+        document.querySelector(`[data-message="電話"]`).textContent = "請填寫正確電話格式";
+        return;
+    }
+})
+
 //util js
 function toThousands(x){ 
 	let parts = x.toString().split("."); //將小數點先移除
 	parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,",");
 	return parts.join(".");
+}
+
+//客製化email 有沒有預期格式
+function validateEmail(mail) {
+    //正規表達式
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+            return true
+        }
+        //alert("You have entered an invalid email address!")
+        return (false)
+}
+
+//客製化email 有沒有預期格式
+function validateEmail(mail) {
+    //正規表達式
+    if (/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(mail)){
+            return true
+        }
+        //alert("You have entered an invalid email address!")
+        return (false)
+}
+
+//電話驗證
+function validatePhone(phone){
+    //要傳字串...不然會
+       if(/^[09]{2}\d{8}$/.test(phone)){
+         return true;
+       }
+        return false;
 }
